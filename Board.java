@@ -226,31 +226,71 @@ public class Board
      */
     public TreeSet<Coordinate> floodIndices( Coordinate loc )
     {
-        Queue<Coordinate> pq = new LinkedList<Coordinate>();
+        Queue<Coordinate> pq = new PriorityQueue<Coordinate>();
         pq.add( loc );
 
         TreeSet<Coordinate> indices = new TreeSet<Coordinate>();
         Color current = this.get( loc );
 
+        int count = 0;
+        
         while ( !pq.isEmpty() )
         {
             Coordinate c = pq.poll();
             indices.add( c );
 
-             System.out.println(indices.contains( c ) );
+            count++;
+            
+//            System.out.println( indices.contains( c ) );
             for ( Coordinate n : getNeighbors( c ) )
             {
-                System.out.println( n + " " + c + " " + indices.contains( n ));
-                if ( get( n ) == current && !indices.contains( n ) )
+//                System.out.println( n + " " + c + " " + indices.contains( n ) );
+                if ( get( n ) == current && !pq.contains( n ) &&  !indices.contains( n ) )
                 {
                     pq.add( n );
                 }
             }
-        }
+        }System.out.println( count );
 
         return indices;
 
+        // TreeSet<Integer> intermediate = floodIndices_fast( loc );
+        //
+        // return null;
     }
+
+
+//    private TreeSet<Integer> floodIndices_fast( Coordinate loc )
+//    {
+//        int i = loc.i;
+//        int j = loc.j;
+//
+//        Queue<Integer> q = new LinkedList<Integer>();
+//        q.add( 100 * i + j );
+//        TreeSet<Integer> vis = new TreeSet<Integer>();
+//        Color current = this.get( loc );
+//
+//        int count = 0;
+//        while ( !q.isEmpty() )
+//        {
+//            int c = q.poll();
+//            vis.add( c );
+//            count++;
+//            // System.out.println( indices.contains( c ) );
+//            for ( Coordinate n : getNeighbors( new Coordinate( c / 100, c % 100 ) ) )
+//            {
+//                int int_r = n.i * 100 + n.j;
+//                // System.out.println( n + " " + c + " " + indices.contains( n )
+//                // );
+//                if ( get( n ) == current && !q.contains( int_r ) && !vis.contains( int_r ) )
+//                {
+//                    q.add( int_r );
+//                }
+//            }
+//        }
+//        System.out.println( count );
+//        return vis;
+//    }
 
 
     @Override
