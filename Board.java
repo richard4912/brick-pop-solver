@@ -42,7 +42,7 @@ public class Board
         {
             for ( int j = 0; j < board[i].length; j++ )
             {
-                if ( this.board[i][j] == Color.empty )
+                if ( this.board[i][j] != Color.empty )
                     return false;
             }
         }
@@ -155,7 +155,7 @@ public class Board
     public Board pop_from( Coordinate location )
     {
         TreeSet<Coordinate> toRemove = this.floodIndices( location );
-        System.out.println( "qwe" + location + " " + toRemove );
+        // System.out.println( "qwe" + location + " " + toRemove );
         if ( toRemove.size() < 2 )
             return null;
 
@@ -232,25 +232,27 @@ public class Board
         TreeSet<Coordinate> indices = new TreeSet<Coordinate>();
         Color current = this.get( loc );
 
-        int count = 0;
-        
+        // int count = 0;
+
         while ( !pq.isEmpty() )
         {
             Coordinate c = pq.poll();
             indices.add( c );
 
-            count++;
-            
-//            System.out.println( indices.contains( c ) );
+            // count++;
+
+            // System.out.println( indices.contains( c ) );
             for ( Coordinate n : getNeighbors( c ) )
             {
-//                System.out.println( n + " " + c + " " + indices.contains( n ) );
-                if ( get( n ) == current && !pq.contains( n ) &&  !indices.contains( n ) )
+                // System.out.println( n + " " + c + " " + indices.contains( n )
+                // );
+                if ( get( n ) == current && !indices.contains( n ) && !pq.contains( n ) )
                 {
                     pq.add( n );
                 }
             }
-        }System.out.println( count );
+        }
+        // System.out.println( count );
 
         return indices;
 
@@ -260,38 +262,38 @@ public class Board
     }
 
 
-//    private TreeSet<Integer> floodIndices_fast( Coordinate loc )
-//    {
-//        int i = loc.i;
-//        int j = loc.j;
-//
-//        Queue<Integer> q = new LinkedList<Integer>();
-//        q.add( 100 * i + j );
-//        TreeSet<Integer> vis = new TreeSet<Integer>();
-//        Color current = this.get( loc );
-//
-//        int count = 0;
-//        while ( !q.isEmpty() )
-//        {
-//            int c = q.poll();
-//            vis.add( c );
-//            count++;
-//            // System.out.println( indices.contains( c ) );
-//            for ( Coordinate n : getNeighbors( new Coordinate( c / 100, c % 100 ) ) )
-//            {
-//                int int_r = n.i * 100 + n.j;
-//                // System.out.println( n + " " + c + " " + indices.contains( n )
-//                // );
-//                if ( get( n ) == current && !q.contains( int_r ) && !vis.contains( int_r ) )
-//                {
-//                    q.add( int_r );
-//                }
-//            }
-//        }
-//        System.out.println( count );
-//        return vis;
-//    }
-
+    // private TreeSet<Integer> floodIndices_fast( Coordinate loc )
+    // {
+    // int i = loc.i;
+    // int j = loc.j;
+    //
+    // Queue<Integer> q = new LinkedList<Integer>();
+    // q.add( 100 * i + j );
+    // TreeSet<Integer> vis = new TreeSet<Integer>();
+    // Color current = this.get( loc );
+    //
+    // int count = 0;
+    // while ( !q.isEmpty() )
+    // {
+    // int c = q.poll();
+    // vis.add( c );
+    // count++;
+    // // System.out.println( indices.contains( c ) );
+    // for ( Coordinate n : getNeighbors( new Coordinate( c / 100, c % 100 ) ) )
+    // {
+    // int int_r = n.i * 100 + n.j;
+    // // System.out.println( n + " " + c + " " + indices.contains( n )
+    // // );
+    // if ( get( n ) == current && !q.contains( int_r ) && !vis.contains( int_r
+    // ) )
+    // {
+    // q.add( int_r );
+    // }
+    // }
+    // }
+    // System.out.println( count );
+    // return vis;
+    // }
 
     @Override
     public String toString()

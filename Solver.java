@@ -17,9 +17,10 @@ class ParallelSolver implements Callable
         TreeMap<Coordinate, Board> available_moves,
         ArrayList<Coordinate> steps )
     {
-
+        System.out.println( available_moves );
         for ( Coordinate move : available_moves.keySet() )
         {
+            
             ArrayList<Coordinate> clonedSteps = cloneList( steps );
             clonedSteps.add( move );
             Board current = available_moves.get( move );
@@ -42,6 +43,8 @@ class ParallelSolver implements Callable
     public ArrayList<Coordinate> call() throws Exception
     {
         ArrayList<Coordinate> result = parallel_search( moves, new ArrayList<Coordinate>() );
+        System.out.println( "exec complete" );
+        System.out.println( result );
         while ( result == null ) // sketch, but so is invokeAny
         {
             int a = 1 + 1;
@@ -93,6 +96,8 @@ public class Solver
             temp.contract();
             callables.add( new ParallelSolver( temp.availableMoves() ) );
         }
+        
+        System.out.println( "hello" );
 
         ArrayList<Coordinate> result = executor.invokeAny( callables );
         System.out.println( result );
