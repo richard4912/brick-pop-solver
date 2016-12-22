@@ -40,6 +40,13 @@ public class Coordinate implements Comparable<Coordinate>
     }
 
 
+    @Override
+    public String toString()
+    {
+        return "(" + i + ", " + j + ")";
+    }
+
+
     public Coordinate offset( int i_off, int j_off )
     {
         return new Coordinate( this.i + i_off, this.j + j_off );

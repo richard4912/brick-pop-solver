@@ -23,6 +23,7 @@ public class Board
     public Board( Color[][] input )
     {
         this.board = input;
+        emptyColumn = new Color[input[0].length];
         for ( int i = 0; i < input[0].length; i++ )
         {
             emptyColumn[i] = Color.empty;
@@ -140,7 +141,7 @@ public class Board
                 if ( element != Color.empty )
                 {
                     Board temp = this.pop_from( currentLocation );
-                    if(!results.containsValue( temp ))
+                    if ( !results.containsValue( temp ) )
                     {
                         results.put( currentLocation, temp );
                     }
@@ -154,6 +155,7 @@ public class Board
     public Board pop_from( Coordinate location )
     {
         TreeSet<Coordinate> toRemove = this.floodIndices( location );
+        System.out.println( "qwe" + location + " " + toRemove );
         if ( toRemove.size() < 2 )
             return null;
 
@@ -200,17 +202,18 @@ public class Board
      *            query location
      * @return a list of valid neighbors to location loc
      */
-    public Coordinate[] getNeighbors( Coordinate loc )
+    public ArrayList<Coordinate> getNeighbors( Coordinate loc )
     {
         ArrayList<Coordinate> possibilities = new ArrayList<Coordinate>();
         int[][] offset = { { -1, 0, 1, 0 }, { 0, 1, 0, -1 } };
-        for ( int i = 0; i < offset.length; i++ )
+        for ( int i = 0; i < offset[0].length; i++ )
         {
-            Coordinate p = loc.offset( offset[i][0], offset[i][1] );
+            Coordinate p = loc.offset( offset[0][i], offset[1][i] );
+            // System.out.println( "gn " + loc + " "+ p );
             if ( isValid( p ) )
                 possibilities.add( p );
         }
-        return possibilities.toArray( new Coordinate[possibilities.size()] );
+        return possibilities;
     }
 
 
@@ -233,14 +236,18 @@ public class Board
         {
             Coordinate c = pq.poll();
             indices.add( c );
+
+             System.out.println(indices.contains( c ) );
             for ( Coordinate n : getNeighbors( c ) )
             {
+                System.out.println( n + " " + c + " " + indices.contains( n ));
                 if ( get( n ) == current && !indices.contains( n ) )
                 {
                     pq.add( n );
                 }
             }
         }
+
         return indices;
 
     }
@@ -267,10 +274,10 @@ public class Board
     @Override
     public boolean equals( Object other )
     {
-        if (!( other instanceof Board ))
+        if ( !( other instanceof Board ) )
         {
             return false;
         }
-        return this.toString().equals(other.toString());
+        return this.toString().equals( other.toString() );
     }
 }
