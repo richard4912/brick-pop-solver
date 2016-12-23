@@ -34,13 +34,14 @@ public class Runner
         // System.exit( 0 );
 
         Board test1 = new Board( test );
-        // System.out.println( test1.availableMoves() );
-        for ( Board b : test1.availableMoves().values() )
-        {
-            System.out.println( b );
-            System.out.println( b.isSolved() );
-        }
+//        // System.out.println( test1.availableMoves() );
+//        for ( Board b : test1.availableMoves().values() )
+//        {
+//            System.out.println( b );
+//            System.out.println( b.isSolved() );
+//        }
         // System.out.println( test1.floodIndices( new Coordinate( 0, 0 ) ) );
+        System.out.println( test1 );
         Solver.solve( test1 );
     }
 }

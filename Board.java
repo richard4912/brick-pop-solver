@@ -141,6 +141,7 @@ public class Board
                 if ( element != Color.empty )
                 {
                     Board temp = this.pop_from( currentLocation );
+                    temp.contract();
                     if ( !results.containsValue( temp ) )
                     {
                         results.put( currentLocation, temp );
@@ -232,6 +233,11 @@ public class Board
         TreeSet<Coordinate> indices = new TreeSet<Coordinate>();
         Color current = this.get( loc );
 
+        if(current == Color.empty)
+        {
+            return indices;
+        }
+        
         // int count = 0;
 
         while ( !pq.isEmpty() )

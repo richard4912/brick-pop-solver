@@ -4,11 +4,15 @@ import java.util.concurrent.*;
 
 class ParallelSolver implements Callable
 {
-    private TreeMap<Coordinate, Board> moves;
+    private Board moves;
+
+    private ArrayList<Coordinate> f;
 
 
-    public ParallelSolver( TreeMap<Coordinate, Board> b )
+    public ParallelSolver( Coordinate firstStep, Board b )
     {
+        f = new ArrayList<Coordinate>();
+        f.add( firstStep );
         moves = b;
     }
 
@@ -20,7 +24,7 @@ class ParallelSolver implements Callable
         System.out.println( available_moves );
         for ( Coordinate move : available_moves.keySet() )
         {
-            
+
             ArrayList<Coordinate> clonedSteps = cloneList( steps );
             clonedSteps.add( move );
             Board current = available_moves.get( move );
@@ -42,14 +46,23 @@ class ParallelSolver implements Callable
     @Override
     public ArrayList<Coordinate> call() throws Exception
     {
-        ArrayList<Coordinate> result = parallel_search( moves, new ArrayList<Coordinate>() );
+        if(moves.isSolved())
+        {
+            return f;
+            
+        }
+        ArrayList<Coordinate> result = parallel_search( moves.availableMoves(), f );
+        
+        f.addAll( result );
+        
+        System.out.println( moves + " " + f );
         System.out.println( "exec complete" );
         System.out.println( result );
         while ( result == null ) // sketch, but so is invokeAny
         {
             int a = 1 + 1;
         }
-        return result;
+        return f;
     }
 
 
@@ -90,14 +103,14 @@ public class Solver
         for ( Coordinate initial : available_moves.keySet() )
         {
             Board temp = available_moves.get( initial );
-//            System.out.println( initial + " " + temp);
-            temp = temp.pop_from( initial );
-//            System.out.println( initial);
-            temp.contract();
-            callables.add( new ParallelSolver( temp.availableMoves() ) );
+             System.out.println( initial + " " + temp);
+//            temp = temp.pop_from( initial );
+//             System.out.println( temp);
+//            temp.contract();
+            callables.add( new ParallelSolver( initial, temp) );
         }
-        
-        System.out.println( "hello" );
+
+        // System.out.println( "hello" );
 
         ArrayList<Coordinate> result = executor.invokeAny( callables );
         System.out.println( result );
