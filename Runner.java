@@ -1,47 +1,43 @@
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.*;
 
 
+/**
+ * Responsible for running the brick pop solver - incomplete, change filename in
+ * source code for now.
+ *
+ * @author richard
+ * @version Dec 30, 2016
+ * @author Project: Brick-Pop-Solver
+ */
 public class Runner
 {
-    public static void main( String[] args ) throws InterruptedException, ExecutionException
+    public static void main( String[] args ) throws InterruptedException, ExecutionException, IOException
     {
-        Color red = new Color( "red" );
-        Color blue = new Color( "blue" );
-        Color green = new Color( "green" );
-
-        Color[][] test = new Color[10][10];
-        for ( int x = 0; x < 10; x++ )
+        String filename = "test7.png";
+        if ( args.length > 0 ) // replaces the filename from source if one is
+                               // passed in by command line argument
         {
-            for ( int y = 0; y < 10; y++ )
+            filename = args[0];
+        }
+        Board test = new Board( LoadImage.getBoard( filename ) );
+
+        ArrayList<Coordinate> solution = Solver.solve( test );
+
+        // Verify correctness of solution by modeling it; if this errors, you
+        // know something's wrong
+        for ( Coordinate loc : solution )
+        {
+            System.out.println( loc );
+            test = test.pop_at( loc );
+
+            if ( test.isSolved() )
             {
-                test[x][y] = red;
+                return;
             }
         }
-
-        // Coordinate tester = new Coordinate( 0, 0 );
-        // System.out.println( tester );
-        // System.out.println( tester.offset( -1, 1 ) );
-        //
-        // int[][] offset = { { -1, 0, 1, 0 }, { 0, 1, 0, -1 } };
-        // for ( int i = 0; i < offset[0].length; i++ )
-        // {
-        // Coordinate p = tester.offset( offset[0][i], offset[1][i] );
-        // System.out.println( "gn " + tester + " " + p );
-        //
-        // }
-        //
-        // System.exit( 0 );
-
-        Board test1 = new Board( test );
-//        // System.out.println( test1.availableMoves() );
-//        for ( Board b : test1.availableMoves().values() )
-//        {
-//            System.out.println( b );
-//            System.out.println( b.isSolved() );
-//        }
-        // System.out.println( test1.floodIndices( new Coordinate( 0, 0 ) ) );
-        System.out.println( test1 );
-        Solver.solve( test1 );
+        // If the code reaches this stage, the solution was incorrect
+        System.exit( 1 );
     }
 }

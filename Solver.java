@@ -2,13 +2,31 @@ import java.util.*;
 import java.util.concurrent.*;
 
 
-class ParallelSolver implements Callable
+/**
+ * We use ExecutorService and Callable to make Parallelism easy; this solution
+ * is inherently parallel
+ *
+ * @author Richard
+ * @version Dec 30, 2016
+ * @author Project: Brick-Pop-Solver
+ *
+ */
+class ParallelSolver implements Callable<ArrayList<Coordinate>>
 {
     private Board moves;
 
     private ArrayList<Coordinate> f;
 
 
+    /**
+     * Constructs a new instance of ParallelSolver with specified first step
+     * (already taken), and a game state
+     * 
+     * @param firstStep
+     *            first step to reach this state
+     * @param b
+     *            current game state
+     */
     public ParallelSolver( Coordinate firstStep, Board b )
     {
         f = new ArrayList<Coordinate>();
@@ -17,16 +35,26 @@ class ParallelSolver implements Callable
     }
 
 
+    /**
+     * Parallel-friendly DFS method for brick pop
+     * 
+     * @param available_moves
+     *            Map representing list of available moves
+     * @param steps
+     *            past steps, used to track solution
+     * @return an ArrayList of coordinates representing a solution if one
+     *         exists, otherwise null
+     */
     public ArrayList<Coordinate> parallel_search(
         TreeMap<Coordinate, Board> available_moves,
         ArrayList<Coordinate> steps )
     {
-        System.out.println( available_moves );
+        // System.out.println( available_moves );
         for ( Coordinate move : available_moves.keySet() )
         {
-
             ArrayList<Coordinate> clonedSteps = cloneList( steps );
             clonedSteps.add( move );
+
             Board current = available_moves.get( move );
 
             if ( current.isSolved() )
@@ -43,29 +71,37 @@ class ParallelSolver implements Callable
     }
 
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.util.concurrent.Callable#call()
+     */
     @Override
     public ArrayList<Coordinate> call() throws Exception
     {
-        if(moves.isSolved())
+        if ( moves.isSolved() )
         {
             return f;
-            
         }
+
         ArrayList<Coordinate> result = parallel_search( moves.availableMoves(), f );
-        
-        f.addAll( result );
-        
-        System.out.println( moves + " " + f );
-        System.out.println( "exec complete" );
-        System.out.println( result );
-        while ( result == null ) // sketch, but so is invokeAny
+
+        if ( result == null ) // sketch, but so is invokeAny
         {
-            int a = 1 + 1;
+            Thread.sleep( Long.MAX_VALUE );
         }
-        return f;
+
+        return result;
     }
 
 
+    /**
+     * Private helper method, makes a deep copy of an ArrayList
+     * 
+     * @param input
+     *            an ArrayList
+     * @return deep copy of input
+     */
     private <E> ArrayList<E> cloneList( ArrayList<E> input )
     {
         ArrayList<E> res = new ArrayList<E>( input.size() );
@@ -79,20 +115,17 @@ class ParallelSolver implements Callable
 }
 
 
+/**
+ * Wrapper class for ParallelSolver. This is the single point of entry for the
+ * computational meat of this project
+ *
+ * @author Richard
+ * @version Dec 30, 2016
+ * @author Project: Brick-Pop-Solver
+ *
+ */
 public class Solver
 {
-    // The pixel offset distance between any two color blocks
-    final int IMAGE_BLOCK_OFFSET = 48;
-
-    // The vertical pixel offset from the top of the screen of the first color
-    // block
-    final int IMAGE_BLOCK_START_I = 213;
-
-    // The horizontal pixel offset from the left of the screen of the first
-    // color block
-    final int IMAGE_BLOCK_START_J = 25;
-
-
     public static ArrayList<Coordinate> solve( Board b ) throws InterruptedException, ExecutionException
     {
         TreeMap<Coordinate, Board> available_moves = b.availableMoves();
@@ -103,19 +136,11 @@ public class Solver
         for ( Coordinate initial : available_moves.keySet() )
         {
             Board temp = available_moves.get( initial );
-             System.out.println( initial + " " + temp);
-//            temp = temp.pop_from( initial );
-//             System.out.println( temp);
-//            temp.contract();
-            callables.add( new ParallelSolver( initial, temp) );
+
+            callables.add( new ParallelSolver( initial, temp ) );
         }
 
-        // System.out.println( "hello" );
-
-        ArrayList<Coordinate> result = executor.invokeAny( callables );
-        System.out.println( result );
-
-        return result;
+        return executor.invokeAny( callables );
     }
 
 }

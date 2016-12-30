@@ -2,7 +2,7 @@ import java.util.*;
 
 
 /**
- * Class represents a game board state
+ * Class representing a game board state
  *
  * @author Richard
  * @version Dec 19, 2016
@@ -50,19 +50,40 @@ public class Board
     }
 
 
+    /**
+     * Returns the Color at a specific coordinate from this board
+     * 
+     * @param loc
+     *            a coordinate
+     * @return the Color at a specific coordinate from this board
+     */
     public Color get( Coordinate loc )
     {
         return this.board[loc.i][loc.j];
     }
 
 
+    /**
+     * Checks if a given coordinate is valid
+     * 
+     * @param loc
+     *            a coordinate
+     * @return true iff loc is a valid Coordinate in the context of this Board
+     */
     public boolean isValid( Coordinate loc )
     {
         return loc.i >= 0 && loc.j >= 0 && loc.i < this.board.length && loc.j < this.board[0].length;
     }
 
 
-    public Color[] extractColumn( int columnNumber )
+    /**
+     * Pulls a column from this board; is helper method
+     * 
+     * @param columnNumber
+     *            the number of the column to extract
+     * @return the specified column from this board
+     */
+    private Color[] extractColumn( int columnNumber )
     {
         ArrayList<Color> col = new ArrayList<Color>();
         for ( Color[] i : this.board )
@@ -73,7 +94,15 @@ public class Board
     }
 
 
-    public Color[] processColumn( Color[] column )
+    /**
+     * Shrinks a column down, shifting empty spaces to the top of the column as
+     * necessary
+     * 
+     * @param column
+     *            an array of Colors representing a column from this board
+     * @return a compressed column
+     */
+    private Color[] processColumn( Color[] column )
     {
         ArrayList<Color> temp = new ArrayList<Color>( column.length );
         int emptyCount = 0;
@@ -92,11 +121,19 @@ public class Board
     }
 
 
-    public Color[][] processColumns( Color[][] column )
+    /**
+     * Removes empty columns and shifts non-empty columns left as necessary
+     * 
+     * @param columns
+     *            an array of Color arrays, each of which represent a single
+     *            column
+     * @return transposed result, new board
+     */
+    public Color[][] compressRows( Color[][] columns )
     {
-        ArrayList<Color[]> temp = new ArrayList<Color[]>( column[0].length );
+        ArrayList<Color[]> temp = new ArrayList<Color[]>( columns[0].length );
         int emptyCount = 0;
-        for ( Color[] c : column )
+        for ( Color[] c : columns )
         {
             boolean emptyColumn = true;
             for ( Color k : c )
@@ -115,7 +152,7 @@ public class Board
             temp.add( emptyColumn );
         }
 
-        Color[][] result = new Color[column.length][column[0].length];
+        Color[][] result = new Color[columns.length][columns[0].length];
         for ( int i = 0; i < board.length; i++ )
         {
             for ( int j = 0; j < board[i].length; j++ )
@@ -128,6 +165,14 @@ public class Board
     }
 
 
+    /**
+     * Returns a Map of Coordinates and Boards representing all possible moves
+     * from this state; each Coordinate represents a brick pop, while each
+     * corresponding board reflects game state after the relevant pop
+     * 
+     * @return a Map of Coordinates and Boards representing all possible moves
+     *         from this state
+     */
     public TreeMap<Coordinate, Board> availableMoves()
     {
         TreeMap<Coordinate, Board> results = new TreeMap<Coordinate, Board>();
@@ -140,7 +185,13 @@ public class Board
                 Color element = get( currentLocation );
                 if ( element != Color.empty )
                 {
-                    Board temp = this.pop_from( currentLocation );
+                    Board temp = this.pop_at( currentLocation );
+
+                    if ( temp == null )
+                    {
+                        continue;
+                    }
+
                     temp.contract();
                     if ( !results.containsValue( temp ) )
                     {
@@ -153,11 +204,20 @@ public class Board
     }
 
 
-    public Board pop_from( Coordinate location )
+    /**
+     * Models the process of popping a Brick at a specified location
+     * 
+     * @param location
+     *            a Coordinate in this board
+     * @return a new Board representing the results of popping the specified
+     *         brick
+     */
+    public Board pop_at( Coordinate location )
     {
+        // gets all locations to pop
         TreeSet<Coordinate> toRemove = this.floodIndices( location );
-        // System.out.println( "qwe" + location + " " + toRemove );
-        if ( toRemove.size() < 2 )
+        if ( toRemove.size() < 2 ) // is not a valid pop; no single bricks are
+                                   // untouchable
             return null;
 
         Color[][] result = new Color[this.board.length][this.board[0].length];
@@ -176,6 +236,7 @@ public class Board
                 }
             }
         }
+
         Board rv = new Board( result );
         rv.contract();
         return rv;
@@ -192,7 +253,7 @@ public class Board
         {
             columns[i] = processColumn( extractColumn( i ) );
         }
-        this.board = processColumns( columns );
+        this.board = compressRows( columns );
     }
 
 
@@ -210,7 +271,6 @@ public class Board
         for ( int i = 0; i < offset[0].length; i++ )
         {
             Coordinate p = loc.offset( offset[0][i], offset[1][i] );
-            // System.out.println( "gn " + loc + " "+ p );
             if ( isValid( p ) )
                 possibilities.add( p );
         }
@@ -233,92 +293,57 @@ public class Board
         TreeSet<Coordinate> indices = new TreeSet<Coordinate>();
         Color current = this.get( loc );
 
-        if(current == Color.empty)
+        if ( current == Color.empty )
         {
             return indices;
         }
-        
-        // int count = 0;
 
         while ( !pq.isEmpty() )
         {
             Coordinate c = pq.poll();
             indices.add( c );
 
-            // count++;
-
-            // System.out.println( indices.contains( c ) );
             for ( Coordinate n : getNeighbors( c ) )
             {
-                // System.out.println( n + " " + c + " " + indices.contains( n )
-                // );
-                if ( get( n ) == current && !indices.contains( n ) && !pq.contains( n ) )
+
+                if ( get( n ) != Color.empty && get( n ).equals( current ) && !indices.contains( n )
+                    && !pq.contains( n ) )
                 {
                     pq.add( n );
                 }
             }
         }
-        // System.out.println( count );
-
         return indices;
 
-        // TreeSet<Integer> intermediate = floodIndices_fast( loc );
-        //
-        // return null;
     }
 
 
-    // private TreeSet<Integer> floodIndices_fast( Coordinate loc )
-    // {
-    // int i = loc.i;
-    // int j = loc.j;
-    //
-    // Queue<Integer> q = new LinkedList<Integer>();
-    // q.add( 100 * i + j );
-    // TreeSet<Integer> vis = new TreeSet<Integer>();
-    // Color current = this.get( loc );
-    //
-    // int count = 0;
-    // while ( !q.isEmpty() )
-    // {
-    // int c = q.poll();
-    // vis.add( c );
-    // count++;
-    // // System.out.println( indices.contains( c ) );
-    // for ( Coordinate n : getNeighbors( new Coordinate( c / 100, c % 100 ) ) )
-    // {
-    // int int_r = n.i * 100 + n.j;
-    // // System.out.println( n + " " + c + " " + indices.contains( n )
-    // // );
-    // if ( get( n ) == current && !q.contains( int_r ) && !vis.contains( int_r
-    // ) )
-    // {
-    // q.add( int_r );
-    // }
-    // }
-    // }
-    // System.out.println( count );
-    // return vis;
-    // }
-
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
     @Override
     public String toString()
     {
-        StringBuffer res = new StringBuffer( "{" );
+        StringBuffer res = new StringBuffer( "" );
         for ( int i = 0; i < board.length; i++ )
         {
-            res.append( "{ " );
             for ( int j = 0; j < board[0].length; j++ )
             {
-                res.append( this.board[i][j] + ", " );
+                res.append( this.board[board.length - 1 - i][j] + "\t" );
             }
-            res.append( "}, " );
+            res.append( System.lineSeparator() );
         }
-        res.append( "}" );
         return res.toString();
     }
 
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
     @Override
     public boolean equals( Object other )
     {
