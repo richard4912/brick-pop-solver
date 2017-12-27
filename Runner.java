@@ -15,6 +15,7 @@ public class Runner
 {
     public static void main( String[] args ) throws InterruptedException, ExecutionException, IOException
     {
+    	System.out.println("hello!");
         String filename = "test7.png";
         if ( args.length > 0 ) // replaces the filename from source if one is
                                // passed in by command line argument
