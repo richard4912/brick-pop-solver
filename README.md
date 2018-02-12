@@ -1,4 +1,4 @@
-# brick-pop-solver
+# Brick Pop Solver
 
 ## Usage
 After compilation, run:
